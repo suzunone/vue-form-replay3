@@ -1,79 +1,115 @@
-<script>
-import { defineComponent } from 'vue';
-
-export default /*#__PURE__*/defineComponent({
-  name: 'VueFormReplay3Sample', // vue component name
-  data() {
-    return {
-      counter: 5,
-      initCounter: 5,
-      message: {
-        action: null,
-        amount: null,
-      },
-    };
-  },
-  computed: {
-    changedBy() {
-      const { message } = this;
-      if (!message.action) return 'initialized';
-      return `${message.action} ${message.amount || ''}`.trim();
-    },
-  },
-  methods: {
-    increment(arg) {
-      const amount = (typeof arg !== 'number') ? 1 : arg;
-      this.counter += amount;
-      this.message.action = 'incremented by';
-      this.message.amount = amount;
-    },
-    decrement(arg) {
-      const amount = (typeof arg !== 'number') ? 1 : arg;
-      this.counter -= amount;
-      this.message.action = 'decremented by';
-      this.message.amount = amount;
-    },
-    reset() {
-      this.counter = this.initCounter;
-      this.message.action = 'reset';
-      this.message.amount = null;
-    },
-  },
-});
-</script>
-
 <template>
-  <div class="vue-form-replay3-sample">
-    <p>The counter was {{ changedBy }} to <b>{{ counter }}</b>.</p>
-    <button @click="increment">
-      Click +1
-    </button>
-    <button @click="decrement">
-      Click -1
-    </button>
-    <button @click="increment(5)">
-      Click +5
-    </button>
-    <button @click="decrement(5)">
-      Click -5
-    </button>
-    <button @click="reset">
-      Reset
-    </button>
+  <div>
+    <form method="post" action="./">
+      <h1>textarea example</h1>
+      <div>
+        <FormRecordTextarea name="stdin" rows="30" cols="100" save-emit-name="save"
+                            @save="saveTextarea"></FormRecordTextarea>
+      </div>
+      <div>
+        <FormReplayTextarea name="stdin" rows="30" cols="100"
+                            readonly="true"
+                            :replay-data="textareaReplayData"></FormReplayTextarea>
+      </div>
+
+      <hr>
+
+      <h1>input type=text example</h1>
+      <div>
+        <FormRecordInput type="text" name="user_name" replayName="user_name" save-emit-name="save"
+                         use-local-storage=true
+                         @save="saveInputTypeText"/>
+      </div>
+      <div>
+        <FormReplayInput name="user_name" type="text" readonly="true" :replay-data="inputTypeTextReplayData"/>
+      </div>
+      <hr>
+
+
+      <h1>codemirror example</h1>
+      <div>
+        <FormRecordCodemirror
+            name="source_code"
+            replayName="source_code"
+            :options="{lineNumbers: true,
+        mode: 'text/javascript',
+        theme: 'idea',}" save-emit-name="save" @save="saveCodemirror"></FormRecordCodemirror>
+      </div>
+      <div>
+        <FormReplayCodemirror
+            :options="{
+          lineNumbers: true,
+        mode: 'text/javascript',
+        theme: 'idea',
+        readOnly: true,
+        }"
+            :replay-data="codemirrorReplayData"></FormReplayCodemirror>
+      </div>
+
+      <div>
+        <button type="submit">submit</button>
+      </div>
+    </form>
+
+
   </div>
 </template>
 
+<script>
+import 'codemirror/mode/javascript/javascript.js';
+import FormRecordTextarea from './form-record-textarea.vue';
+import FormRecordCodemirror from './form-record-codemirror.vue';
+import FormRecordInput from './form-record-input.vue';
+import FormReplayTextarea from './form-replay-textarea.vue';
+import FormReplayCodemirror from './form-replay-codemirror.vue';
+import FormReplayInput from './form-replay-input.vue';
+
+export default {
+  name: "vue-form-replay3-sample",
+  components: {
+    FormRecordTextarea,
+    FormRecordInput,
+    FormRecordCodemirror,
+    FormReplayTextarea,
+    FormReplayCodemirror,
+    FormReplayInput
+  },
+
+  data() {
+    return {
+      sourceCodePointer: 1,
+      userNamePointer: 1,
+      textareaReplayData: {},
+      inputTypeTextReplayData: {},
+      codemirrorReplayData: {},
+    };
+  },
+
+  methods: {
+    saveTextarea(data/*, replayName, tags*/) {
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+      this.textareaReplayData = Object.assign({}, this.textareaReplayData, data);
+    },
+
+    saveInputTypeText(data/*, replayName, tags*/) {
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+      this.inputTypeTextReplayData = Object.assign({}, this.inputTypeTextReplayData, data);
+    },
+
+    saveCodemirror(data/*, replayName, tags*/) {
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+      this.codemirrorReplayData = Object.assign({}, this.codemirrorReplayData, data);
+    }
+  }
+}
+</script>
+
 <style scoped>
-  .vue-form-replay3-sample {
-    display: block;
-    width: 400px;
-    margin: 25px auto;
-    border: 1px solid #ccc;
-    background: #eaeaea;
-    text-align: center;
-    padding: 25px;
-  }
-  .vue-form-replay3-sample p {
-    margin: 0 0 1em;
-  }
+
 </style>
